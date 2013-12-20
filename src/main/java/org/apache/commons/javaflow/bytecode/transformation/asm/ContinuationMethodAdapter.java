@@ -17,13 +17,11 @@
 package org.apache.commons.javaflow.bytecode.transformation.asm;
 
 import java.util.List;
-
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.BasicValue;
@@ -46,6 +44,8 @@ public final class ContinuationMethodAdapter extends MethodAdapter implements Op
 
     private int currentIndex = 0;
     private Frame currentFrame = null;
+    private int currentLineNumber = -1;
+    private Label currentLabel;
 
 
     public ContinuationMethodAdapter(ContinuationMethodAnalyzer a) {
@@ -59,6 +59,7 @@ public final class ContinuationMethodAdapter extends MethodAdapter implements Op
         this.methodDesc = a.desc;
     }
 
+    @Override
     public void visitCode() {
         mv.visitCode();
 
@@ -77,7 +78,7 @@ public final class ContinuationMethodAdapter extends MethodAdapter implements Op
         mv.visitVarInsn(ASTORE, stackRecorderVar);
         mv.visitLabel(startLabel);
 
-        // PC: if (stackRecorder != null && !stackRecorder.isRestoring) {  
+        // PC: if (stackRecorder != null && !stackRecorder.isRestoring) {
         mv.visitJumpInsn(IFNULL, l0);
         mv.visitVarInsn(ALOAD, stackRecorderVar);
         mv.visitFieldInsn(GETFIELD, STACK_RECORDER, "isRestoring", "Z");
@@ -90,10 +91,10 @@ public final class ContinuationMethodAdapter extends MethodAdapter implements Op
 
         // switch cases
         for (int i = 0; i < fsize; i++) {
-            Label frameLabel = (Label) labels.get(i);
+            Label frameLabel = labels.get(i);
             mv.visitLabel(restoreLabels[i]);
 
-            MethodInsnNode mnode = (MethodInsnNode) nodes.get(i);
+            MethodInsnNode mnode = nodes.get(i);
             Frame frame = analyzer.getFrames()[canalyzer.getIndex(mnode)];
 
             // for each local variable store the value in locals popping it from the stack!
@@ -164,10 +165,10 @@ public final class ContinuationMethodAdapter extends MethodAdapter implements Op
             }
 
             if (mnode.getOpcode() != INVOKESTATIC) {
-                // Load the object whose method we are calling  
+                // Load the object whose method we are calling
                 BasicValue value = ((BasicValue) frame.getStack(ssize - argSize - 1));
-                if (isNull(value)) { 
-                  // If user code causes NPE, then we keep this behavior: load null to get NPE at runtime 
+                if (isNull(value)) {
+                  // If user code causes NPE, then we keep this behavior: load null to get NPE at runtime
                   mv.visitInsn(ACONST_NULL);
                 } else {
                   mv.visitVarInsn(ALOAD, stackRecorderVar);
@@ -191,14 +192,25 @@ public final class ContinuationMethodAdapter extends MethodAdapter implements Op
         mv.visitLabel(l0);
     }
 
+    @Override
     public void visitLabel(Label label) {
         if (currentIndex < labels.size() && label == labels.get(currentIndex)) {
-            int i = canalyzer.getIndex((AbstractInsnNode)nodes.get(currentIndex));
+            int i = canalyzer.getIndex(nodes.get(currentIndex));
             currentFrame = analyzer.getFrames()[i];
         }
+        currentLabel = label;
         mv.visitLabel(label);
     }
 
+    @Override
+    public void visitLineNumber(int line, Label start) {
+        super.visitLineNumber(line, start);
+        if (currentLabel == start) {
+            currentLineNumber = line;
+        }
+    }
+
+    @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         mv.visitMethodInsn(opcode, owner, name, desc);
 
@@ -276,8 +288,27 @@ public final class ContinuationMethodAdapter extends MethodAdapter implements Op
             }
 
             mv.visitVarInsn(ALOAD, stackRecorderVar);
-            mv.visitIntInsn(BIPUSH, currentIndex);  // TODO optimize to iconst_0...
+            if(currentIndex >= 128) {
+              // if > 127 then it's a SIPUSH, not a BIPUSH...
+              mv.visitIntInsn(SIPUSH, currentIndex);
+            } else {
+              // TODO optimize to iconst_0...
+              mv.visitIntInsn(BIPUSH, currentIndex);
+            }
             mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, "pushInt", "(I)V");
+
+            // Push stack trace element
+            mv.visitVarInsn(ALOAD, stackRecorderVar);
+            mv.visitTypeInsn(NEW, "java/lang/StackTraceElement");
+            mv.visitInsn(DUP);
+            mv.visitLdcInsn(canalyzer.className.replace('/', '.'));
+            mv.visitLdcInsn(canalyzer.name);
+            mv.visitLdcInsn(canalyzer.sourceFileName);
+            mv.visitLdcInsn(currentLineNumber);
+            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StackTraceElement", "<init>",
+                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V");
+            mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, "pushStackTrace",
+                    "(Ljava/lang/StackTraceElement;)V");
 
             if (currentFrame instanceof MonitoringFrame) {
                 int[] monitoredLocals = ((MonitoringFrame) currentFrame).getMonitored();
@@ -300,6 +331,7 @@ public final class ContinuationMethodAdapter extends MethodAdapter implements Op
     }
 
 
+    @Override
     public void visitMaxs(int maxStack, int maxLocals) {
         Label endLabel = new Label();
         mv.visitLabel(endLabel);
@@ -310,12 +342,14 @@ public final class ContinuationMethodAdapter extends MethodAdapter implements Op
     }
 
     static boolean isNull(BasicValue value) {
-      if (null == value)
-        return true;
-      if (!value.isReference())
-        return false;
-      final Type type = value.getType();
-      return "Lnull;".equals(type.getDescriptor()); 
+        if (null == value) {
+            return true;
+        }
+        if (!value.isReference()) {
+            return false;
+        }
+        final Type type = value.getType();
+        return "Lnull;".equals(type.getDescriptor());
     }
 
     void pushDefault(Type type) {

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import org.apache.commons.javaflow.utils.ReflectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,14 +32,16 @@ public class Stack implements Serializable {
 
     private static final Log log = LogFactory.getLog(Stack.class);
     private static final long serialVersionUID = 2L;
-    
+
     private int[] istack;
     private float[] fstack;
     private double[] dstack;
     private long[] lstack;
     private Object[] ostack;
     private Object[] rstack;
+    private StackTraceElement[] stackTrace;
     private int iTop, fTop, dTop, lTop, oTop, rTop;
+    private int stackTraceTop = 0;
     protected Runnable runnable;
 
     public Stack(Runnable pRunnable) {
@@ -48,6 +51,7 @@ public class Stack implements Serializable {
         fstack = new float[5];
         ostack = new Object[10];
         rstack = new Object[5];
+        stackTrace = new StackTraceElement[10];
         runnable = pRunnable;
     }
 
@@ -58,12 +62,14 @@ public class Stack implements Serializable {
         fstack = new float[pParent.fstack.length];
         ostack = new Object[pParent.ostack.length];
         rstack = new Object[pParent.rstack.length];
+        stackTrace = Arrays.copyOf(pParent.stackTrace, pParent.stackTrace.length);
         iTop = pParent.iTop;
         fTop = pParent.fTop;
         dTop = pParent.dTop;
         lTop = pParent.lTop;
         oTop = pParent.oTop;
         rTop = pParent.rTop;
+        stackTraceTop = pParent.stackTraceTop;
         System.arraycopy(pParent.istack, 0, istack, 0, iTop);
         System.arraycopy(pParent.fstack, 0, fstack, 0, fTop);
         System.arraycopy(pParent.dstack, 0, dstack, 0, dTop);
@@ -76,12 +82,12 @@ public class Stack implements Serializable {
     public boolean hasDouble() {
         return dTop > 0;
     }
-    
+
     public double popDouble() {
         if (dTop == 0) {
             throw new EmptyStackException("pop double");
         }
-        
+
         final double d = dstack[--dTop];
         log.debug("pop double " + d + " " + getStats());
         return d;
@@ -95,7 +101,7 @@ public class Stack implements Serializable {
         if (fTop == 0) {
             throw new EmptyStackException("pop float");
         }
-        
+
         final float f = fstack[--fTop];
         log.debug("pop float " + f + " " + getStats());
         return f;
@@ -109,7 +115,7 @@ public class Stack implements Serializable {
         if (iTop == 0) {
             throw new EmptyStackException("pop int");
         }
-        
+
         final int i = istack[--iTop];
         log.debug("pop int " + i + " " + getStats());
         return i;
@@ -123,7 +129,7 @@ public class Stack implements Serializable {
         if (lTop == 0) {
             throw new EmptyStackException("pop long");
         }
-        
+
         final long l = lstack[--lTop];
         log.debug("pop long " + l + " " + getStats());
         return l;
@@ -137,7 +143,7 @@ public class Stack implements Serializable {
         if (oTop == 0) {
             throw new EmptyStackException("pop object");
         }
-        
+
         final Object o = ostack[--oTop];
         ostack[oTop] = null;  // avoid unnecessary reference to object
 
@@ -147,7 +153,7 @@ public class Stack implements Serializable {
 
             log.debug("pop object "+ clazz + "/" + clazzLoader + " [" + o + "] ");
         }
-        
+
         return o;
     }
 
@@ -159,7 +165,7 @@ public class Stack implements Serializable {
         if (rTop == 0) {
             throw new EmptyStackException("pop reference");
         }
-        
+
         final Object o = rstack[--rTop];
         rstack[rTop] = null;  // avoid unnecessary reference to object
 
@@ -169,7 +175,7 @@ public class Stack implements Serializable {
 
             log.debug("pop reference "+ clazz + "/" + clazzLoader + " [" + o + "] " + getStats());
         }
-        
+
         return o;
     }
 
@@ -186,7 +192,7 @@ public class Stack implements Serializable {
 
     public void pushFloat(float f) {
         log.debug("push float " + f + " " + getStats());
-        
+
         if (fTop == fstack.length) {
             float[] hlp = new float[Math.max(8,fstack.length*2)];
             System.arraycopy(fstack, 0, hlp, 0, fstack.length);
@@ -208,7 +214,7 @@ public class Stack implements Serializable {
 
     public void pushLong(long l) {
         log.debug("push long " + l + " " + getStats());
-        
+
         if (lTop == lstack.length) {
             long[] hlp = new long[Math.max(8,lstack.length*2)];
             System.arraycopy(lstack, 0, hlp, 0, lstack.length);
@@ -221,10 +227,10 @@ public class Stack implements Serializable {
 
         if (log.isDebugEnabled()) {
             final String clazz = ReflectionUtils.getClassName(o);
-            final String clazzLoader = ReflectionUtils.getClassLoaderName(o);            
+            final String clazzLoader = ReflectionUtils.getClassLoaderName(o);
             log.debug("push object " + clazz + "/" + clazzLoader + " [" + o + "] " + getStats());
         }
-        
+
         if (oTop == ostack.length) {
             Object[] hlp = new Object[Math.max(8,ostack.length*2)];
             System.arraycopy(ostack, 0, hlp, 0, ostack.length);
@@ -238,16 +244,37 @@ public class Stack implements Serializable {
         if (log.isDebugEnabled()) {
             final String clazz = ReflectionUtils.getClassName(o);
             final String clazzLoader = ReflectionUtils.getClassLoaderName(o);
-    
+
             log.debug("push reference " + clazz + "/" + clazzLoader + " [" + o + "] " + getStats());
         }
-        
+
         if (rTop == rstack.length) {
             Object[] hlp = new Object[Math.max(8,rstack.length*2)];
             System.arraycopy(rstack, 0, hlp, 0, rstack.length);
             rstack = hlp;
         }
         rstack[rTop++] = o;
+    }
+
+    public void pushStackTrace(StackTraceElement stackTraceElem) {
+        if (log.isDebugEnabled()) {
+            log.debug("Push stack trace element " + stackTraceElem);
+        }
+        if (stackTraceTop == stackTrace.length) {
+            StackTraceElement[] newStackTrace = new StackTraceElement[Math.max(
+                    8, stackTrace.length * 2)];
+            System.arraycopy(stackTrace, 0, newStackTrace, 0, stackTrace.length);
+            stackTrace = newStackTrace;
+        }
+        stackTrace[stackTraceTop++] = stackTraceElem;
+    }
+
+    public void clearStackTrace() {
+        stackTraceTop = 0;
+    }
+
+    public StackTraceElement[] getStackTrace() {
+        return Arrays.copyOf(stackTrace, stackTraceTop);
     }
 
     public boolean isSerializable() {
@@ -299,10 +326,11 @@ public class Stack implements Serializable {
             sb.append(ReflectionUtils.getClassName(rstack[i])).append('/').append(ReflectionUtils.getClassLoaderName(rstack[i]));
             sb.append('\n');
         }
-        
+
         return sb.toString();
     }
-    
+
+    @Override
     public String toString() {
         return getContent();
     }
@@ -337,6 +365,11 @@ public class Stack implements Serializable {
         s.writeInt(rTop);
         for( int i=0; i<rTop; i++ ) {
             s.writeObject(rstack[i]);
+        }
+
+        s.writeInt(stackTraceTop);
+        for (int i = 0; i < stackTraceTop; ++i) {
+            s.writeObject(stackTrace[i]);
         }
 
         s.writeObject(runnable);
@@ -377,6 +410,12 @@ public class Stack implements Serializable {
         rstack = new Object[rTop];
         for( int i=0; i<rTop; i++ ) {
             rstack[i] = s.readObject();
+        }
+
+        stackTraceTop = s.readInt();
+        stackTrace = new StackTraceElement[stackTraceTop];
+        for (int i = 0; i < stackTraceTop; ++i) {
+            stackTrace[i] = (StackTraceElement)s.readObject();
         }
 
         runnable = (Runnable)s.readObject();

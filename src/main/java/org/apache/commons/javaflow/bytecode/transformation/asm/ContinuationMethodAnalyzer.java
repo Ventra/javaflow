@@ -16,31 +16,14 @@
  */
 package org.apache.commons.javaflow.bytecode.transformation.asm;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
-import org.objectweb.asm.tree.analysis.Analyzer;
-import org.objectweb.asm.tree.analysis.AnalyzerException;
+import java.util.*;
+import org.objectweb.asm.*;
+import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.analysis.*;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.objectweb.asm.tree.analysis.SimpleVerifier;
-import org.objectweb.asm.tree.analysis.SourceInterpreter;
-import org.objectweb.asm.tree.analysis.SourceValue;
 
 public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
+    private ClassLoader classLoader;
 
     protected final String className;
     protected final ClassVisitor cv;
@@ -52,9 +35,12 @@ public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
 
     protected Analyzer analyzer;
     public int stackRecorderVar;
+    String sourceFileName;
 
-    public ContinuationMethodAnalyzer(String className, ClassVisitor cv, MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
+    public ContinuationMethodAnalyzer(ClassLoader classLoader, String className, ClassVisitor cv,
+            MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
         super(access, name, desc, signature, exceptions);
+        this.classLoader = classLoader;
         this.className = className;
         this.cv = cv;
         this.mv = mv;
@@ -64,6 +50,7 @@ public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
         return instructions.indexOf(node);
     }
 
+    @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         MethodInsnNode mnode = new MethodInsnNode(opcode, owner, name, desc);
         if (opcode == INVOKESPECIAL || "<init>".equals(name)) {
@@ -78,6 +65,7 @@ public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
         instructions.add(mnode);
     }
 
+    @Override
     public void visitEnd() {
         if (instructions.size() == 0 || labels.size() == 0) {
             accept(mv);
@@ -101,28 +89,21 @@ public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
             moveNew();
 
             // analyzer = new Analyzer(new BasicVerifier());
-            analyzer = new Analyzer(new SimpleVerifier() {
+            SimpleVerifier verifier = new SimpleVerifier();
+            verifier.setClassLoader(classLoader);
+            analyzer = new Analyzer(verifier) {
 
-                protected Class<?> getClass(Type t) {
-                    try {
-                        if (t.getSort() == Type.ARRAY) {
-                            return Class.forName(t.getDescriptor().replace('/', '.'), true, Thread.currentThread().getContextClassLoader());
-                        }
-                        return Class.forName(t.getClassName(), true, Thread.currentThread().getContextClassLoader());
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e.toString());
-                    }
-                }
-            }) {
-
+                @Override
                 protected Frame newFrame(final int nLocals, final int nStack) {
                     return new MonitoringFrame(nLocals, nStack);
                 }
 
+                @Override
                 protected Frame newFrame(final Frame src) {
                     return new MonitoringFrame(src);
                 }
 
+                @Override
                 public Frame[] analyze(final String owner, final MethodNode m) throws AnalyzerException {
                     // System.out.println("Analyze: "+owner+"|"+m.name+"|"+m.signature+"|"+m.tryCatchBlocks);
                     final Frame[] frames = super.analyze(owner, m);
@@ -220,7 +201,7 @@ public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
                 requireDup = true;
             }
 
-            MethodInsnNode mnode = (MethodInsnNode) e.getValue();
+            MethodInsnNode mnode = e.getValue();
             AbstractInsnNode nm = mnode;
 
             int varOffset = stackRecorderVar + 1;
@@ -312,11 +293,12 @@ public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
         maxStack += updateMaxStack;
     }
 
+    @SuppressWarnings("unused")
     boolean needsFrameGuard(int opcode, String owner, String name, String desc) {
         /* TODO: need to customize a way enchancer skips classes/methods
             if (owner.startsWith("java/")) {
-            	System.out.println("SKIP:: " + owner + "." + name + desc);
-            	return false;
+                System.out.println("SKIP:: " + owner + "." + name + desc);
+                return false;
             }
         */
 

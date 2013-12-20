@@ -35,13 +35,13 @@ import org.apache.commons.logging.LogFactory;
  * <p>
  * <tt>Continuation</tt> objects are used to restore the captured execution states
  * later.
- * 
+ *
  */
 public final class Continuation implements Serializable {
 
     private static final Log log = LogFactory.getLog(Continuation.class);
     private static final long serialVersionUID = 2L;
-    
+
     private final StackRecorder stackRecorder;
 
     /**
@@ -71,6 +71,10 @@ public final class Continuation implements Serializable {
         return StackRecorder.get().getContext();
     }
 
+    public StackTraceElement[] getStackTrace() {
+        return stackRecorder.getStackTrace();
+    }
+
     /**
      * Creates a new {@link Continuation} object from the specified {@link Runnable}
      * object.
@@ -79,7 +83,7 @@ public final class Continuation implements Serializable {
      * Unlike the {@link #startWith(Runnable)} method, this method doesn't actually
      * execute the <tt>Runnable</tt> object. It will be executed when
      * it's {@link #continueWith(Continuation) continued}.
-     * 
+     *
      * @return
      *      always return a non-null valid object.
      */
@@ -191,10 +195,10 @@ public final class Continuation implements Serializable {
     public boolean isSerializable() {
         return stackRecorder.isSerializable();
     }
-    
+
     /**
-     * Accessor for value yielded by continuation  
-     * 
+     * Accessor for value yielded by continuation
+     *
      * @return
      *      The latest value yielded by suspended continuation.
      *      The value is passed from the continuation to the client code via {@link #suspend(Object)}
@@ -202,7 +206,7 @@ public final class Continuation implements Serializable {
     public Object value() {
         return stackRecorder.value;
     }
-    
+
     /**
      * Stops the running continuation.
      *
@@ -215,14 +219,14 @@ public final class Continuation implements Serializable {
      *      The value to be returned to suspended code after continuation is resumed.
      *      The value is passed from the client code via @link #continueWith(Continuation, Object)
      *      and is identical to value returned by {@link #getContext}.
-     *      
+     *
      * @throws IllegalStateException
      *      if this method is called outside the {@link #continueWith} or {@link #startWith} methods.
      */
     public static Object suspend() {
         return suspend(null);
     }
-    
+
     /**
      * Stops the running continuation.
      *
@@ -231,7 +235,7 @@ public final class Continuation implements Serializable {
      * When called, the thread returns from the above methods with a new {@link Continuation}
      * object that captures the thread state and with {@link #value} equals to parameter passed.
      *
-     * @param value 
+     * @param value
      *      The intermediate result yielded by suspended continuations
      *      The value may be accessed via {@link #value} method of continuation returned
      *
@@ -239,10 +243,10 @@ public final class Continuation implements Serializable {
      *      The value to be returned to suspended code after continuation is resumed.
      *      The value is passed from the client code via @link #continueWith(Continuation, Object)
      *      and is identical to value returned by {@link #getContext}.
-     *      
+     *
      * @throws IllegalStateException
      *      if this method is called outside the {@link #continueWith} or {@link #startWith} methods.
-     */    
+     */
     public static Object suspend(final Object value) {
         return StackRecorder.suspend(value);
     }
@@ -329,6 +333,7 @@ public final class Continuation implements Serializable {
         throw new ContinuationDeath(ContinuationDeath.MODE_CANCEL);
     }
 
+    @Override
     public String toString() {
         return "Continuation@" + hashCode() + "/" + ReflectionUtils.getClassLoaderName(this);
     }

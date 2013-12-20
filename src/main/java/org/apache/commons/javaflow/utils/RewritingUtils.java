@@ -40,13 +40,14 @@ public final class RewritingUtils {
     public interface Matcher {
         boolean isMatching( final String name );
     }
-    
+
     private final static Matcher MATCH_ALL = new Matcher() {
+        @Override
         public boolean isMatching(final String pName) {
             return true;
         }
     };
-    
+
     /*
      * TODO multiple transformers
      */
@@ -186,6 +187,6 @@ public final class RewritingUtils {
         }
 
         // System.out.println("done");
-        
+
     }
 }

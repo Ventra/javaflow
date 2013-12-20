@@ -19,7 +19,8 @@ package org.apache.commons.javaflow.bytecode.transformation;
 public final class NopResourceTransformer implements ResourceTransformer {
 
     public static final NopResourceTransformer INSTANCE = new NopResourceTransformer();
-    
+
+    @Override
     public byte[] transform( byte[] original ) {
         return original;
     }

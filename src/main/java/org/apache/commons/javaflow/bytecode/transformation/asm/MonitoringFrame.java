@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class MonitoringFrame extends Frame {
-    
+
     // keeps track of monitored locals
     private List<Integer> monitored;
 
@@ -40,17 +40,18 @@ public final class MonitoringFrame extends Frame {
         monitored = new LinkedList<Integer>();
     }
 
+    @Override
     public void execute(AbstractInsnNode insn, Interpreter interpreter)
             throws AnalyzerException {
-        
-    	boolean never = false;
+
+        boolean never = false;
         if (never) {
             super.execute(insn, interpreter);
             return;
         }
 
         int insnOpcode = insn.getOpcode();
-        
+
         if (insnOpcode == Opcodes.MONITORENTER || insnOpcode == Opcodes.MONITOREXIT) {
             Value pop = pop();
             interpreter.unaryOperation(insn, pop);
@@ -59,7 +60,7 @@ public final class MonitoringFrame extends Frame {
             for (int i = 0; i < getLocals(); i++) {
                 if (getLocal(i) == pop) local = i;
             }
-            
+
             if (local > -1) {
                 if (insnOpcode == Opcodes.MONITORENTER) {
                     monitorEnter(local);
@@ -73,6 +74,7 @@ public final class MonitoringFrame extends Frame {
         }
     }
 
+    @Override
     public Frame init(Frame frame) {
         super.init(frame);
         if (frame instanceof MonitoringFrame) {
@@ -82,7 +84,7 @@ public final class MonitoringFrame extends Frame {
         }
         return this;
     }
-    
+
     public int[] getMonitored() {
         int[] res = new int[monitored.size()];
         for (int i = 0; i < monitored.size(); i++) {
@@ -90,11 +92,11 @@ public final class MonitoringFrame extends Frame {
         }
         return res;
     }
-    
+
     public void monitorEnter(int local) {
         monitored.add(new Integer(local));
     }
-    
+
     public void monitorExit(int local) {
         int index = monitored.lastIndexOf(local);
         if (index == -1) {

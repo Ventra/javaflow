@@ -27,10 +27,10 @@ import org.apache.commons.javaflow.bytecode.StackRecorder;
  * This class is only for javaflow internal code.
  */
 public final class ContinuationDeath extends Error {
-    
-	private static final long serialVersionUID = 1L;
 
-	final String mode;
+    private static final long serialVersionUID = 1L;
+
+    final String mode;
 
     public ContinuationDeath(String mode) {
         this.mode = mode;

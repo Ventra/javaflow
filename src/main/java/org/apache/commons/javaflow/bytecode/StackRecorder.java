@@ -81,6 +81,7 @@ public final class StackRecorder extends Stack {
         stackRecorder.isCapturing = !stackRecorder.isRestoring;
         stackRecorder.isRestoring = false;
         stackRecorder.value = value;
+        stackRecorder.clearStackTrace();
 
         // flow breaks here, actual return will be executed in resumed continuation
         // return in continuation to be suspended is executed as well but ignored
@@ -93,13 +94,13 @@ public final class StackRecorder extends Stack {
         try {
             isRestoring = !isEmpty(); // start restoring if we have a filled stack
             this.context = context;
-            
+
             if (isRestoring) {
                 if (log.isDebugEnabled()) {
                     log.debug("Restoring state of " + ReflectionUtils.getClassName(runnable) + "/" + ReflectionUtils.getClassLoaderName(runnable));
                 }
             }
-            
+
             log.debug("calling runnable");
             runnable.run();
 

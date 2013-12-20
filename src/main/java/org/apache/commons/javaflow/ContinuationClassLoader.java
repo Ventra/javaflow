@@ -44,11 +44,11 @@ import java.util.List;
  * isolate the continuation-enabled portion of your application into a separate
  * jar file.
  */
-public final class ContinuationClassLoader extends URLClassLoader {
+public class ContinuationClassLoader extends URLClassLoader {
 
     private final static Log log = LogFactory.getLog(ContinuationClassLoader.class);
 
-    private final ResourceTransformer transformer;
+    private ResourceTransformer transformer;
 
     /**
      * Indicates whether the parent class loader should be
@@ -107,6 +107,10 @@ public final class ContinuationClassLoader extends URLClassLoader {
 
     public ContinuationClassLoader(URL[] urls, ClassLoader parent) {
         this(urls,parent,new AsmClassTransformer());
+    }
+
+    public void setTransformer(ResourceTransformer transformer) {
+        this.transformer = transformer;
     }
 
     private static ClassLoader fixNullParent(ClassLoader classLoader) {
@@ -261,6 +265,7 @@ public final class ContinuationClassLoader extends URLClassLoader {
      * on the system classpath (when not in isolated mode) or this loader's
      * classpath.
      */
+    @Override
     protected synchronized Class<?> loadClass(String classname, boolean resolve)
          throws ClassNotFoundException {
         // 'sync' is needed - otherwise 2 threads can load the same class
@@ -312,6 +317,7 @@ public final class ContinuationClassLoader extends URLClassLoader {
      */
     protected Class<?> defineClassFromData(final byte[] classData, final String classname) {
         return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
+            @Override
             public Class<?> run() {
                 // define a package if necessary.
                 int i = classname.lastIndexOf('.');
@@ -347,21 +353,21 @@ public final class ContinuationClassLoader extends URLClassLoader {
      */
     private Class<?> getClassFromStream(InputStream stream, String classname) throws IOException, SecurityException {
 
-    	final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-	        
-        	int bytesRead;
-	        byte[] buffer = new byte[BUFFER_SIZE];
-	
-	        while ((bytesRead = stream.read(buffer, 0, BUFFER_SIZE)) != -1) {
-	            baos.write(buffer, 0, bytesRead);
-	        }
-	
-	        byte[] classData = baos.toByteArray();
-	        return defineClassFromData(classData, classname);
-        
+
+            int bytesRead;
+            byte[] buffer = new byte[BUFFER_SIZE];
+
+            while ((bytesRead = stream.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                baos.write(buffer, 0, bytesRead);
+            }
+
+            byte[] classData = baos.toByteArray();
+            return defineClassFromData(classData, classname);
+
         } finally {
-        	baos.close();
+            baos.close();
         }
     }
 
@@ -376,6 +382,7 @@ public final class ContinuationClassLoader extends URLClassLoader {
      * @exception ClassNotFoundException if the requested class does not exist
      *                                   on this loader's classpath.
      */
+    @Override
     public Class<?> findClass(final String name) throws ClassNotFoundException {
         log.debug("Finding class " + name);
 
@@ -410,6 +417,7 @@ public final class ContinuationClassLoader extends URLClassLoader {
      *         resource could not be found or the caller doesn't have
      *         adequate privileges to get the resource.
      */
+    @Override
     public synchronized URL getResource(String name) {
         // we need to search the components of the path to see if
         // we can find the class we want.

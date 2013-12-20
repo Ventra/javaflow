@@ -17,9 +17,7 @@
 package org.apache.commons.javaflow.bytecode;
 
 /**
- * Marker interface to mark classes, which are transformed by the 
- * ContinuationClassLoader.
- *
+ * Marker interface to mark classes that are transformed by the AsmClassTransformer.
  */
 public interface Continuable {
 }

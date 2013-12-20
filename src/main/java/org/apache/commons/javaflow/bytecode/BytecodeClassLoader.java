@@ -18,7 +18,6 @@ package org.apache.commons.javaflow.bytecode;
 
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.commons.EmptyVisitor;
 
 public class BytecodeClassLoader extends ClassLoader {
 
@@ -26,29 +25,30 @@ public class BytecodeClassLoader extends ClassLoader {
         private String className;
 
         public NameClassAdapter() {
-            super(new EmptyVisitor());
+            super(null);
         }
-        
+
+        @Override
         public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
             className = name;
         }
-        
+
         public String getName() {
             return className;
         }
     }
-    
+
     public Class<?> loadClass( final byte[] bytecode ) {
         final NameClassAdapter nameClassAdapter = new NameClassAdapter();
-        
+
         new ClassReader(bytecode).accept(nameClassAdapter, 0);
-        
+
         final String name = nameClassAdapter.getName().replace('/', '.');
-        
+
         // System.out.println("loading class " + name);
-        
+
         final Class<?> clazz = defineClass(name, bytecode, 0, bytecode.length);
-        
+
         return clazz;
     }
 }

@@ -29,6 +29,7 @@ public class CompositeTransformer implements ResourceTransformer {
         this.transformers = transformers;
     }
 
+    @Override
     public byte[] transform(byte[] image) {
         for (int i = 0; i < transformers.length; i++) {
             image = transformers[i].transform(image);
