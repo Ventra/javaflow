@@ -25,7 +25,6 @@ import java.util.jar.JarOutputStream;
 
 import org.apache.commons.javaflow.bytecode.transformation.ResourceTransformer;
 import org.apache.commons.javaflow.bytecode.transformation.asm.AsmClassTransformer;
-import org.apache.commons.javaflow.bytecode.transformation.bcel.BcelClassTransformer;
 import org.apache.commons.javaflow.utils.RewritingUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
@@ -36,7 +35,6 @@ import org.apache.tools.ant.types.FileSet;
 /**
  * Ant task that enhances class files with javaflow instrumentation.
  */
-@SuppressWarnings("deprecation")
 public class AntRewriteTask extends MatchingTask {
 
     private ResourceTransformer transformer;
@@ -75,15 +73,13 @@ public class AntRewriteTask extends MatchingTask {
      */
     public void setMode(String name) {
         name = name.toLowerCase();
-        if(name.equals("bcel")) {
-            transformer = new BcelClassTransformer(srcDir);
-        } else if(name.equals("asm")) {
+        if(name.equals("asm")) {
             transformer = new AsmClassTransformer();
         } else {
             throw new BuildException("Unrecognized mode: "+name);
         }
     }
-    
+
     /**
      * Check that all required attributes have been set and nothing
      * silly has been entered.
