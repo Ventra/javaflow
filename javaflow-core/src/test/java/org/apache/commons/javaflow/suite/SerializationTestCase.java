@@ -36,8 +36,7 @@ import org.apache.commons.javaflow.rewrite.Simple;
 import org.apache.commons.javaflow.rewrite.SimpleSerializable;
 import org.junit.Ignore;
 
-@Ignore // FIXME
-@SuppressWarnings("unchecked")
+@Ignore
 public final class SerializationTestCase extends TestCase {
 
     private File output;
@@ -48,19 +47,19 @@ public final class SerializationTestCase extends TestCase {
     }
 
     public void testSuspend() throws Exception {
-        assertTrue(fromSuite());        
+        assertTrue(fromSuite());
         final SimpleSerializable r = new SimpleSerializable();
         assertTrue(r.g == -1);
         assertTrue(r.l == -1);
         Continuation c1 = Continuation.startWith(r);
         assertTrue(r.g == 0);
         assertTrue(r.l == 0);
-        
+
         output = File.createTempFile("continuation", "xml");
         output.deleteOnExit();
 
         saveJDK(c1, output);
-        
+
     }
 
     public class ObjectInputStreamExt extends ObjectInputStream {
@@ -72,17 +71,17 @@ public final class SerializationTestCase extends TestCase {
             this.classloader = loader;
         }
 
-        protected Class resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
+        protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
 
-        	return Class.forName(classDesc.getName(), true, classloader);
+            return Class.forName(classDesc.getName(), true, classloader);
         }
 
-        protected Class resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
-            Class[] cinterfaces = new Class[interfaces.length];
+        protected Class<?> resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
+            Class<?>[] cinterfaces = new Class[interfaces.length];
             for (int i = 0; i < interfaces.length; i++) {
-            	cinterfaces[i] = Class.forName(interfaces[i], true, classloader);
+                cinterfaces[i] = Class.forName(interfaces[i], true, classloader);
             }
-            
+
             try {
                 return Proxy.getProxyClass(classloader, cinterfaces);
             } catch (IllegalArgumentException e) {
@@ -90,52 +89,50 @@ public final class SerializationTestCase extends TestCase {
             }
         }
     }
-    
-    
+
     private void saveJDK(final Object c1, final File output) throws IOException {
-    	final ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(output));    	
-    	oos.writeObject(c1); 
-    	oos.close(); 
+        final ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(output));
+        oos.writeObject(c1);
+        oos.close();
     }
 
     private Object loadJDK(final File input) throws IOException, ClassNotFoundException {
-    	final ObjectInputStream ois = new ObjectInputStreamExt(new FileInputStream(input), this.getClass().getClassLoader());
-    	final Object o = ois.readObject();
-    	ois.close();
-    	return o;
+        final ObjectInputStream ois = new ObjectInputStreamExt(new FileInputStream(input), this.getClass().getClassLoader());
+        final Object o = ois.readObject();
+        ois.close();
+        return o;
     }
-    
+
     public void testResume() throws Exception {
-        assertTrue(fromSuite());        
+        assertTrue(fromSuite());
         testSuspend();
         assertTrue("suspend must succeed to create the output first", output != null);
 
         assertEquals(output.length(), 562);
-        
+
         final Object o = loadJDK(output);
-        
+
         assertTrue(o instanceof Continuation);
         final Continuation c1 = (Continuation) o;
-        final StackRecorder sr1 = (StackRecorder) PrivateAccessor.getField(c1,"stackRecorder");
+        final StackRecorder sr1 = (StackRecorder) PrivateAccessor.getField(c1, "stackRecorder");
         final Runnable r1 = (Runnable) PrivateAccessor.getField(sr1, "runnable");
         assertEquals(SimpleSerializable.class.getName(), r1.getClass().getName());
-        
-        final SimpleSerializable ss1 = (SimpleSerializable)r1;
+
+        final SimpleSerializable ss1 = (SimpleSerializable) r1;
         assertTrue(ss1.g == 0);
         assertTrue(ss1.l == 0);
         final Continuation c2 = Continuation.continueWith(c1);
-        final StackRecorder sr2 = (StackRecorder) PrivateAccessor.getField(c2,"stackRecorder");
+        final StackRecorder sr2 = (StackRecorder) PrivateAccessor.getField(c2, "stackRecorder");
         final Runnable r2 = (Runnable) PrivateAccessor.getField(sr2, "runnable");
         assertEquals(SimpleSerializable.class.getName(), r2.getClass().getName());
-        final SimpleSerializable ss2 = (SimpleSerializable)r2;
+        final SimpleSerializable ss2 = (SimpleSerializable) r2;
         assertTrue(ss2.g == 1);
         assertTrue(ss2.l == 1);
         assertTrue(r1 == r2);
     }
 
-
     public void testSerializableCheck() throws Exception {
-        assertTrue(fromSuite());        
+        assertTrue(fromSuite());
         final Runnable r1 = new Simple();
         Continuation c1 = Continuation.startWith(r1);
         assertTrue(c1 != null);

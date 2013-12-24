@@ -40,40 +40,39 @@ import org.apache.commons.javaflow.suite.VerificationTestCase;
 
 public final class AsmTestSuite extends TestSuite {
 
-	public static Test suite() throws Exception {
+    @SuppressWarnings("unchecked")
+    public static Test suite() throws Exception {
 
-		// LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", SimpleLog.class.getName());
-		// System.setProperty("org.apache.commons.logging.simplelog.defaultlog", "debug");
-		
-    	final ClassTransformerClassLoader classloader =
-            new ClassTransformerClassLoader(
-            		new AsmClassTransformer(),
-            		new Class[] { // instrument
-            			BlackRed.class,
-            			ClassAccess1.class,
-            			ClassAccess2.class,
-            			CounterFlow.class,
-            			DefaultConstructor.class,
-            			Simple.class,
-            			NewObject.class,
-            			NoReference.class,
-            			SimpleSerializable.class,
-            			RewriteBugs.class,
-            			SimpleTryCatch.class,
-            			SimpleSynchronized.class,
-            			Stack.class,	
-            			}, 
-            		new Class[] { // load
-            			VerificationTestCase.class,
-            			SerializationTestCase.class
-            			}  
-            		);
-        
+        // LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", SimpleLog.class.getName());
+        // System.setProperty("org.apache.commons.logging.simplelog.defaultlog", "debug");
+
+        final ClassTransformerClassLoader classloader = new ClassTransformerClassLoader(
+            new AsmClassTransformer(),
+            new Class[] { // instrument
+                BlackRed.class,
+                ClassAccess1.class,
+                ClassAccess2.class,
+                CounterFlow.class,
+                DefaultConstructor.class,
+                Simple.class,
+                NewObject.class,
+                NoReference.class,
+                SimpleSerializable.class,
+                RewriteBugs.class,
+                SimpleTryCatch.class,
+                SimpleSynchronized.class,
+                Stack.class,
+                },
+            new Class[] { // load
+                VerificationTestCase.class,
+                SerializationTestCase.class
+            }
+        );
+
         final TestSuite suite = new TestSuite();
         suite.setName("ASM");
-        suite.addTestSuite((Class<? extends TestCase>)classloader.loadClass(VerificationTestCase.class.getName()));
-        suite.addTestSuite((Class<? extends TestCase>)classloader.loadClass(SerializationTestCase.class.getName()));
+        suite.addTestSuite((Class<? extends TestCase>) classloader.loadClass(VerificationTestCase.class.getName()));
+        suite.addTestSuite((Class<? extends TestCase>) classloader.loadClass(SerializationTestCase.class.getName()));
         return suite;
     }
-
 }

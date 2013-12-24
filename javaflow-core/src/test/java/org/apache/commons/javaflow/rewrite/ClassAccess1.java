@@ -18,14 +18,13 @@ package org.apache.commons.javaflow.rewrite;
 
 import org.apache.commons.javaflow.Continuation;
 
-@SuppressWarnings({ "unchecked", "unused" })
+@SuppressWarnings({ "unused" })
 public final class ClassAccess1 implements Runnable {
 
     public void run() {
-        final Class clazz1 = ClassAccess1.class;
-        final Class clazz2 = this.getClass();
-        
+        final Class<?> clazz1 = ClassAccess1.class;
+        final Class<?> clazz2 = this.getClass();
+
         Continuation.suspend();
     }
-
 }

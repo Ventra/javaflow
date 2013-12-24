@@ -16,7 +16,7 @@
  */
 package org.apache.commons.javaflow.rewrite;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * Test that allocates a lot of new objects. Javaflow performs some tricky

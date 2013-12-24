@@ -19,6 +19,10 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <prerequisites>
+    <maven>3.0.4</maven>
+  </prerequisites>
+
   <groupId>ru.ventra.javaflow</groupId>
   <artifactId>javaflow-parent</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -59,6 +63,7 @@
 
   <dependencyManagement>
     <dependencies>
+
       <!-- =============================== -->
       <!-- Internal Dependencies -->
       <!-- =============================== -->
@@ -67,6 +72,7 @@
         <artifactId>javaflow-core</artifactId>
         <version>${project.version}</version>
       </dependency>
+
       <!-- =============================== -->
       <!-- Required dependencies -->
       <!-- =============================== -->
@@ -207,38 +213,26 @@
     </pluginManagement>
   </build>
 
-  <developers>
-    <developer>
-      <id>tcurdt</id>
-      <name>Torsten Curdt</name>
-      <email>tcurdt at apache.org</email>
-    </developer>
-    <developer>
-      <id>kohsuke</id>
-      <name>Kohsuke Kawaguchi</name>
-      <email>kohsuke at apache.org</email>
-    </developer>
-  </developers>
-
-  <contributors>
-    <contributor>
-      <name>Eugene Kuleshov</name>
-      <email>eu at javatx.org</email>
-    </contributor>
-    <contributor>
-      <name>Valery Silaev</name>
-      <email>vsilaev at gmail.com</email>
-    </contributor>
-  </contributors>
-
   <scm>
     <connection>scm:git:git@github.com:Ventra/javaflow.git</connection>
+    <developerConnection>scm:git:git@github.com:Ventra/javaflow.git</developerConnection>
+    <url>https://github.com/Ventra/javaflow</url>
+    <tag>HEAD</tag>
   </scm>
+
+  <issueManagement>
+    <system>Jira</system>
+    <url>https://issues.ventra.ru/jira/browse/JF</url>
+  </issueManagement>
 
   <distributionManagement>
     <repository>
       <id>ru.ventra.ebr.public</id>
       <url>https://ebr.ventra.ru/public</url>
     </repository>
+    <snapshotRepository>
+      <id>ru.ventra.ebr.public-snapshot</id>
+      <url>https://ebr.ventra.ru/public-snapshot</url>
+    </snapshotRepository>
   </distributionManagement>
 </project>

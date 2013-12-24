@@ -18,7 +18,6 @@ package org.apache.commons.javaflow.rewrite;
 
 import org.apache.commons.javaflow.Continuation;
 
-@SuppressWarnings("unchecked")
 public final class ClassAccess3 implements Runnable {
 
     /*
@@ -27,16 +26,16 @@ public final class ClassAccess3 implements Runnable {
         DUP
         IFNONNULL L1
         POP
-       
+
        L2 (5)
         LDC "asm.data.ClassAccess2"
         INVOKESTATIC Class.forName(String) : Class
-       
+
        L3 (8)
         DUP
         PUTSTATIC ClassAccess2.class$0 : Class
         GOTO L1
-       
+
        L4 (12)
         NEW NoClassDefFoundError
         DUP_X1
@@ -44,7 +43,7 @@ public final class ClassAccess3 implements Runnable {
         INVOKEVIRTUAL Throwable.getMessage() : String
         INVOKESPECIAL NoClassDefFoundError.<init>(String) : void
         ATHROW
-       
+
        L1 (19)
         ASTORE 1: clazz1
        L5 (21)
@@ -55,9 +54,9 @@ public final class ClassAccess3 implements Runnable {
        L7 (25)
         TRYCATCHBLOCK L2 L3 L4 ClassNotFoundException
      */
-  
-    static Class class$0;
-  
+
+    static Class<?> class$0;
+
     public void run() {
         // final Class clazz1 = ClassAccess2.class;
         // final Class clazz2 = this.getClass();
@@ -68,8 +67,7 @@ public final class ClassAccess3 implements Runnable {
             throw new NoClassDefFoundError(ex.getMessage());
           }
         // }
-        
+
         Continuation.suspend();
     }
-
 }
