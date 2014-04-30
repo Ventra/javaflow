@@ -17,10 +17,11 @@
 package org.apache.commons.javaflow;
 
 import java.io.Serializable;
+
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import org.apache.commons.javaflow.utils.ReflectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Snapshot of a thread execution state.
@@ -39,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class Continuation implements Serializable {
 
-    private static final Log log = LogFactory.getLog(Continuation.class);
+    private static final Logger log = LoggerFactory.getLogger(Continuation.class);
     private static final long serialVersionUID = 2L;
 
     private final StackRecorder stackRecorder;

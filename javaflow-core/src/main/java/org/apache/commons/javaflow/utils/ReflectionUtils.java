@@ -16,21 +16,18 @@
  */
 package org.apache.commons.javaflow.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ReflectionUtils {
 
-    private final static Log log = LogFactory.getLog(ReflectionUtils.class);
+    private final static Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
 
     public interface Matcher {
         boolean matches(final String pName);

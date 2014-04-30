@@ -16,11 +16,6 @@
  */
 package org.apache.commons.javaflow;
 
-import org.apache.commons.javaflow.bytecode.transformation.ResourceTransformer;
-import org.apache.commons.javaflow.bytecode.transformation.asm.AsmClassTransformer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +27,11 @@ import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.javaflow.bytecode.transformation.ResourceTransformer;
+import org.apache.commons.javaflow.bytecode.transformation.asm.AsmClassTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link URLClassLoader} with bytecode instrumentation for javaflow.
@@ -46,7 +46,7 @@ import java.util.List;
  */
 public class ContinuationClassLoader extends URLClassLoader {
 
-    private final static Log log = LogFactory.getLog(ContinuationClassLoader.class);
+    private final static Logger log = LoggerFactory.getLogger(ContinuationClassLoader.class);
 
     private ResourceTransformer transformer;
 

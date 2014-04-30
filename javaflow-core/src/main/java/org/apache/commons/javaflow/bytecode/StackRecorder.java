@@ -16,10 +16,10 @@
  */
 package org.apache.commons.javaflow.bytecode;
 
-import org.apache.commons.javaflow.utils.ReflectionUtils;
 import org.apache.commons.javaflow.ContinuationDeath;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.javaflow.utils.ReflectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adds additional behaviors necessary for stack capture/restore
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class StackRecorder extends Stack {
 
-    private static final Log log = LogFactory.getLog(StackRecorder.class);
+    private static final Logger log = LoggerFactory.getLogger(StackRecorder.class);
     private static final long serialVersionUID = 2L;
 
     private static final ThreadLocal<StackRecorder> threadMap = new ThreadLocal<StackRecorder>();

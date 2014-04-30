@@ -30,9 +30,10 @@
   <name>Javaflow :: Core</name>
 
   <dependencies>
+    <!-- Logging -->
     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
 
     <!-- ASM -->
@@ -48,7 +49,8 @@
       <groupId>asm</groupId>
       <artifactId>asm-util</artifactId>
     </dependency>
-
+	
+	<!-- Tests -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
