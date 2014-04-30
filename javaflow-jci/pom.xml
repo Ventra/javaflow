@@ -29,6 +29,26 @@
   <packaging>jar</packaging>
   <name>Javaflow :: JCI</name>
 
+  <properties>
+    <org.apache.commons.jci>1.0</org.apache.commons.jci>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-jci-core</artifactId>
+        <version>${org.apache.commons.jci}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>ru.ventra.javaflow</groupId>

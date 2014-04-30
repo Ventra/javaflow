@@ -27,7 +27,7 @@
 
   <artifactId>javaflow-ant-task</artifactId>
   <packaging>jar</packaging>
-  <name>Javaflow :: Ant Task</name>
+  <name>Javaflow :: Tooling - Ant Task</name>
 
   <dependencies>
     <dependency>

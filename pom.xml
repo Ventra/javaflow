@@ -31,8 +31,6 @@
 
     <org.slf4j>1.7.7</org.slf4j>
     <org.apache.commons.io>1.4</org.apache.commons.io>
-    <org.apache.commons.jci>1.0</org.apache.commons.jci>
-    <org.apache.ant>1.7.1</org.apache.ant>
     <org.objectweb.asm>3.2</org.objectweb.asm>
 
     <org.junit>4.11</org.junit>
@@ -58,19 +56,12 @@
 
   <dependencyManagement>
     <dependencies>
-
-      <!-- =============================== -->
-      <!-- Internal Dependencies -->
-      <!-- =============================== -->
       <dependency>
         <groupId>ru.ventra.javaflow</groupId>
         <artifactId>javaflow-core</artifactId>
         <version>${project.version}</version>
       </dependency>
 
-      <!-- =============================== -->
-      <!-- Required dependencies -->
-      <!-- =============================== -->
       <!-- Logging -->
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -107,24 +98,6 @@
         <groupId>asm</groupId>
         <artifactId>asm-tree</artifactId>
         <version>${org.objectweb.asm}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-jci-core</artifactId>
-        <version>${org.apache.commons.jci}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.ant</groupId>
-        <artifactId>ant</artifactId>
-        <version>${org.apache.ant}</version>
       </dependency>
 
       <dependency>
