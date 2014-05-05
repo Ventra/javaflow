@@ -22,7 +22,7 @@
   <parent>
     <groupId>ru.ventra.javaflow.tooling</groupId>
     <artifactId>javaflow-tooling</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>javaflow-ant-task</artifactId>
