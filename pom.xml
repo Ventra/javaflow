@@ -214,4 +214,11 @@
       <url>https://ebr.ventra.ru/public-snapshot</url>
     </snapshotRepository>
   </distributionManagement>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <properties></properties>
+    </profile>
+  </profiles>
 </project>
