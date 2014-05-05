@@ -153,6 +153,7 @@
           <version>${maven-release-plugin}</version>
           <configuration>
             <releaseProfiles>release</releaseProfiles>
+            <tagNameFormat>@{project.version}</tagNameFormat>
           </configuration>
         </plugin>
         <plugin>
@@ -196,7 +197,7 @@
     <connection>scm:git:git@github.com:Ventra/javaflow.git</connection>
     <developerConnection>scm:git:git@github.com:Ventra/javaflow.git</developerConnection>
     <url>https://github.com/Ventra/javaflow</url>
-    <tag>javaflow-parent-1.0.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
