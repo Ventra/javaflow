@@ -52,6 +52,23 @@
       <artifactId>maven-core</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <!-- ASM -->
+    <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm-analysis</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm-commons</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm-util</artifactId>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
   <build>
@@ -59,6 +76,19 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <relocations>
+            <relocation>
+              <pattern>org.objectweb.asm</pattern>
+              <shadedPattern>org.apache.commons.javaflow.asm</shadedPattern>
+            </relocation>
+          </relocations>
+        </configuration>
       </plugin>
     </plugins>
   </build>
