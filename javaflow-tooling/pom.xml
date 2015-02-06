@@ -16,7 +16,7 @@
   <parent>
     <groupId>ru.ventra.javaflow</groupId>
     <artifactId>javaflow-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
 
   <groupId>ru.ventra.javaflow.tooling</groupId>
