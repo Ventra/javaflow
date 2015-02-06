@@ -19,7 +19,7 @@
 
   <groupId>ru.ventra.javaflow</groupId>
   <artifactId>javaflow-parent</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>pom</packaging>
 
   <name>Javaflow</name>
@@ -197,7 +197,7 @@
     <connection>scm:git:git@github.com:Ventra/javaflow.git</connection>
     <developerConnection>scm:git:git@github.com:Ventra/javaflow.git</developerConnection>
     <url>https://github.com/Ventra/javaflow</url>
-    <tag>HEAD</tag>
+    <tag>1.0.1</tag>
   </scm>
 
   <issueManagement>
